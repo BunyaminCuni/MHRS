@@ -4,117 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/anasayfa.css">
+      <link rel="stylesheet" href="css/randevu.css">
     <title>Randevu Al - EHRS</title>
-    <style>
-        .form-container {
-            width: calc(100% - 50px);
-            max-width: 600px;
-            margin: 40px auto;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        }
-
-            .form-container h2 {
-                text-align: center;
-                margin-bottom: 30px;
-                color: #1166cc;
-            }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-            .form-group label {
-                display: block;
-                margin-bottom: 8px;
-                font-weight: 600;
-                color: #333;
-            }
-
-            .form-group input,
-            .form-group select,
-            .form-group textarea {
-                width: 100%;
-                padding: 12px;
-                border: 2px solid #e5e7eb;
-                border-radius: 8px;
-                font-size: 16px;
-                transition: border-color 0.3s;
-                box-sizing: border-box;
-            }
-
-                .form-group input:focus,
-                .form-group select:focus,
-                .form-group textarea:focus {
-                    outline: none;
-                    border-color: #1166cc;
-                }
-
-            .form-group textarea {
-                resize: vertical;
-                min-height: 80px;
-            }
-
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: #1166cc;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-            .submit-btn:hover {
-                background: #0d52a1;
-            }
-
-            .submit-btn:disabled {
-                background: #cbd5e1;
-                cursor: not-allowed;
-            }
-
-        .error-message {
-            color: #b33131;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .error-alert {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .debug-info {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            font-size: 12px;
-            font-family: monospace;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-    </style>
 </head>
 <body>
     <header class="header">
@@ -124,19 +15,18 @@
         <nav class="nav">
             <a href="anasayfa.html">Ana Sayfa</a>
             <a href="#">Veteriner Hastaneleri</a>
-            <a href="#">Özel Klinikler</a>
         </nav>
     </header>
-
-    <div class="form-container">
+ <!-- ================= ANA İÇERİK ================= -->
+       <main class="container">
         <h2>Yeni Randevu Al</h2>
-
-        <div id="successMessage" style="display: none;" class="success-message">
+ <!-- Başarılı işlem mesajı -->
+        <div id="successMessage" class="success-message">
             Randevunuz başarıyla oluşturuldu!
         </div>
-
-        <div id="errorMessage" style="display: none;" class="error-alert"></div>
-
+            <!-- Hata mesajı -->
+        <div id="errorMessage" class="error-alert"></div>
+  <!-- ================= FORM ================= -->
         <form id="appointmentForm">
             <div class="form-group">
                 <label for="patientName">Hasta Adı (Evcil Hayvan) *</label>
@@ -177,7 +67,17 @@
 
             <div class="form-group">
                 <label for="hospitalId">Hastane *</label>
-                <select id="hospitalId" name="hospitalId" required>
+<div class="dropdown-container">
+    <input type="text"
+           id="hospitalSearch"
+           placeholder="Hastane ara..."
+           class="dropdown-search">
+
+    <select id="hospitalId" size="5" class="dropdown-select" required>
+        <option value="">Hastane seçiniz</option>
+    </select>
+</div>
+
                     <option value="">Önce ilçe seçiniz</option>
                 </select>
                 <div class="error-message" id="hospitalError"></div>
@@ -209,11 +109,32 @@
         </form>
 
         <div id="debugInfo" class="debug-info" style="display: none;"></div>
-    </div>
+    </main>
+    <!-- ================= FOOTER ================= -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <h3>EHRS – Evcil Hayvan Randevu Sistemi</h3>
+            <p>Bu proje Bilgisayar Mühendisliği bitirme projesi kapsamında geliştirilmiştir.</p>
+            <span>© 2025 EHRS</span>
+        </div>
+    </footer>
 
     <script>
         const BACKEND_PORT = '7116';
         const API_BASE_URL = `https://localhost:${BACKEND_PORT}/api`;
+        const hospitalSearch = document.getElementById('hospitalSearch');
+const hospitalSelect = document.getElementById('hospitalId');
+
+hospitalSearch.addEventListener('keyup', function () {
+    const filter = this.value.toLowerCase();
+    const options = hospitalSelect.options;
+
+    for (let i = 0; i < options.length; i++) {
+        const txt = options[i].text.toLowerCase();
+        options[i].style.display =
+            txt.includes(filter) ? '' : 'none';
+    }
+});
 
         // Minimum tarih ayarla
         const dateInput = document.getElementById('appointmentDate');
