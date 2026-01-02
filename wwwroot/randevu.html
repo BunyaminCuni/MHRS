@@ -51,9 +51,18 @@
 
             <div class="form-group">
                 <label for="cityId">Şehir *</label>
-                <select id="cityId" name="cityId" required>
-                    <option value="">Şehir seçiniz</option>
-                </select>
+               <div class="form-group">
+    <label>Şehir *</label>
+<div class="dropdown-container">
+    <input type="text"
+           id="citySearch"
+           placeholder="Şehir ara..."
+           class="dropdown-search">
+
+    <select id="cityId" size="5" class="dropdown-select">
+        <option value="">Şehir seçiniz</option>
+    </select>
+</div>
                 <div class="error-message" id="cityError"></div>
             </div>
 
