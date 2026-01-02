@@ -44,6 +44,35 @@
     outline: none;
     border-color: #1166cc;
 }
+/* ===== Searchable Dropdown ===== */
+
+.dropdown-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dropdown-search {
+    padding: 8px 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+}
+
+.dropdown-select {
+    font-size: 14px;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    height: auto;
+}
+
+/* Scrollbar */
+.dropdown-select {
+    max-height: 140px;
+    overflow-y: auto;
+}
+
 
 /* ================= BUTON ================= */
 
