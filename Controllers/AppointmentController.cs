@@ -1,6 +1,7 @@
 ﻿using MHRS.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace MHRS.Controllers
 {
@@ -61,6 +62,7 @@ namespace MHRS.Controllers
                 return StatusCode(500, "Hastaneler getirilirken bir hata oluştu");
             }
         }
+
         /// <summary>
         /// Belirtilen şehirdeki ilçeleri getirir
         /// </summary>
@@ -116,18 +118,104 @@ namespace MHRS.Controllers
                 return StatusCode(500, "Hastaneler getirilirken bir hata oluştu");
             }
         }
+
         /// <summary>
-        /// Tamamlanmış randevuları getirir
+        /// Belirtilen hastanedeki doktorları getirir
         /// </summary>
-        [HttpGet("done")]
-        public async Task<ActionResult<IEnumerable<AppointmentResponseDto>>> GetDoneAppointments()
+        [HttpGet("doctors/{hospitalId}")]
+        public async Task<ActionResult<IEnumerable<Doctor>>> GetDoctorsByHospital(int hospitalId)
         {
             try
             {
+                var doctors = await _context.Doctors
+                    .Where(d => d.HospitalId == hospitalId)
+                    .OrderBy(d => d.DoctorName)
+                    .ToListAsync();
+
+                if (!doctors.Any())
+                {
+                    return NotFound(new { message = "Bu hastanede doktor bulunamadı" });
+                }
+
+                return Ok(doctors);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Doktorlar getirilirken hata oluştu: {HospitalId}", hospitalId);
+                return StatusCode(500, "Doktorlar getirilirken bir hata oluştu");
+            }
+        }
+
+        /// <summary>
+        /// Belirtilen doktor, tarih ve saat için müsait saatleri getirir
+        /// </summary>
+        [HttpGet("available-times/{doctorId}/{date}")]
+        public async Task<ActionResult<IEnumerable<string>>> GetAvailableTimes(int doctorId, string date)
+        {
+            try
+            {
+                if (!DateTime.TryParse(date, out DateTime selectedDate))
+                {
+                    return BadRequest(new { message = "Geçersiz tarih formatı" });
+                }
+
+                // Sadece tarih kısmını al (saat olmadan)
+                selectedDate = selectedDate.Date;
+
+                // Bu doktorun seçilen gündeki randevularını al
+                var existingAppointments = await _context.Appointments
+                    .Where(a => a.DoctorId == doctorId &&
+                                a.AppointmentDate.Date == selectedDate &&
+                                a.IsDone == false)
+                    .Select(a => a.AppointmentDate)
+                    .ToListAsync();
+
+                // Çalışma saatleri: 09:00 - 17:00 arası, 30 dakika aralıklarla
+                var allTimeSlots = new List<string>();
+                for (int hour = 9; hour < 17; hour++)
+                {
+                    allTimeSlots.Add($"{hour:D2}:00");
+                    allTimeSlots.Add($"{hour:D2}:30");
+                }
+
+                // Dolu olan saatleri çıkar
+                var availableTimeSlots = allTimeSlots.Where(timeSlot =>
+                {
+                    var timeParts = timeSlot.Split(':');
+                    var slotDateTime = selectedDate.AddHours(int.Parse(timeParts[0])).AddMinutes(int.Parse(timeParts[1]));
+                    return !existingAppointments.Any(a => a == slotDateTime);
+                }).ToList();
+
+                return Ok(availableTimeSlots);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Müsait saatler getirilirken hata oluştu");
+                return StatusCode(500, "Müsait saatler getirilirken bir hata oluştu");
+            }
+        }
+
+        /// <summary>
+        /// Belirtilen telefon numarasına ait tamamlanmış randevuları getirir
+        /// </summary>
+        [HttpGet("done/{mobileNo}")]
+        public async Task<ActionResult<IEnumerable<AppointmentResponseDto>>> GetDoneAppointments(string mobileNo)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(mobileNo))
+                {
+                    return BadRequest(new { message = "Telefon numarası zorunludur" });
+                }
+
                 var appointments = await (from appointment in _context.Appointments
                                           where appointment.IsDone == true
                                           join patient in _context.Patients
                                           on appointment.PatientId equals patient.PatientId
+                                          where patient.MobileNo == mobileNo
+                                          join doctor in _context.Doctors
+                                          on appointment.DoctorId equals doctor.DoctorId into doctorGroup
+                                          from doctor in doctorGroup.DefaultIfEmpty()
                                           select new AppointmentResponseDto
                                           {
                                               PatientName = patient.PatientName,
@@ -135,7 +223,8 @@ namespace MHRS.Controllers
                                               City = patient.City,
                                               AppointmentId = appointment.AppointmentId,
                                               AppointmentDate = appointment.AppointmentDate,
-                                              IsDone = appointment.IsDone
+                                              IsDone = appointment.IsDone,
+                                              DoctorName = doctor != null ? doctor.DoctorName : null
                                           }).ToListAsync();
 
                 return Ok(appointments);
@@ -148,17 +237,26 @@ namespace MHRS.Controllers
         }
 
         /// <summary>
-        /// Bekleyen randevuları getirir
+        /// Belirtilen telefon numarasına ait bekleyen randevuları getirir
         /// </summary>
-        [HttpGet("pending")]
-        public async Task<ActionResult<IEnumerable<AppointmentResponseDto>>> GetPendingAppointments()
+        [HttpGet("pending/{mobileNo}")]
+        public async Task<ActionResult<IEnumerable<AppointmentResponseDto>>> GetPendingAppointments(string mobileNo)
         {
             try
             {
+                if (string.IsNullOrEmpty(mobileNo))
+                {
+                    return BadRequest(new { message = "Telefon numarası zorunludur" });
+                }
+
                 var appointments = await (from appointment in _context.Appointments
                                           where appointment.IsDone == false
                                           join patient in _context.Patients
                                           on appointment.PatientId equals patient.PatientId
+                                          where patient.MobileNo == mobileNo
+                                          join doctor in _context.Doctors
+                                          on appointment.DoctorId equals doctor.DoctorId into doctorGroup
+                                          from doctor in doctorGroup.DefaultIfEmpty()
                                           select new AppointmentResponseDto
                                           {
                                               PatientName = patient.PatientName,
@@ -166,7 +264,8 @@ namespace MHRS.Controllers
                                               City = patient.City,
                                               AppointmentId = appointment.AppointmentId,
                                               AppointmentDate = appointment.AppointmentDate,
-                                              IsDone = appointment.IsDone
+                                              IsDone = appointment.IsDone,
+                                              DoctorName = doctor != null ? doctor.DoctorName : null
                                           }).ToListAsync();
 
                 return Ok(appointments);
@@ -179,7 +278,7 @@ namespace MHRS.Controllers
         }
 
         /// <summary>
-        /// Tüm randevuları getirir
+        /// Tüm randevuları getirir (ADMIN İÇİN)
         /// </summary>
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<AppointmentResponseDto>>> GetAllAppointments()
@@ -189,6 +288,9 @@ namespace MHRS.Controllers
                 var appointments = await (from appointment in _context.Appointments
                                           join patient in _context.Patients
                                           on appointment.PatientId equals patient.PatientId
+                                          join doctor in _context.Doctors
+                                          on appointment.DoctorId equals doctor.DoctorId into doctorGroup
+                                          from doctor in doctorGroup.DefaultIfEmpty()
                                           orderby appointment.AppointmentDate descending
                                           select new AppointmentResponseDto
                                           {
@@ -197,7 +299,8 @@ namespace MHRS.Controllers
                                               City = patient.City,
                                               AppointmentId = appointment.AppointmentId,
                                               AppointmentDate = appointment.AppointmentDate,
-                                              IsDone = appointment.IsDone
+                                              IsDone = appointment.IsDone,
+                                              DoctorName = doctor != null ? doctor.DoctorName : null
                                           }).ToListAsync();
 
                 return Ok(appointments);
@@ -270,6 +373,26 @@ namespace MHRS.Controllers
                     return BadRequest(new { message = "Seçilen hastane seçilen şehirde değil" });
                 }
 
+                // Doktor kontrolü
+                var doctor = await _context.Doctors
+                    .FirstOrDefaultAsync(d => d.DoctorId == request.DoctorId && d.HospitalId == request.HospitalId);
+
+                if (doctor == null)
+                {
+                    return NotFound(new { message = "Doktor bulunamadı veya bu hastaneye ait değil" });
+                }
+
+                // Aynı doktor ve saatte başka randevu var mı kontrol et
+                var existingAppointment = await _context.Appointments
+                    .FirstOrDefaultAsync(a => a.DoctorId == request.DoctorId &&
+                                            a.AppointmentDate == request.AppointmentDate &&
+                                            a.IsDone == false);
+
+                if (existingAppointment != null)
+                {
+                    return BadRequest(new { message = "Bu doktorun seçilen saatte başka randevusu var. Lütfen farklı bir saat seçin." });
+                }
+
                 // Yeni hasta oluştur
                 var patient = new Patient
                 {
@@ -291,6 +414,7 @@ namespace MHRS.Controllers
                 {
                     PatientId = patient.PatientId,
                     HospitalId = request.HospitalId,
+                    DoctorId = request.DoctorId,
                     AppointmentDate = request.AppointmentDate,
                     IsDone = false
                 };
@@ -306,7 +430,8 @@ namespace MHRS.Controllers
                         message = "Randevu başarıyla oluşturuldu",
                         appointmentId = appointment.AppointmentId,
                         patientId = patient.PatientId,
-                        hospitalId = request.HospitalId
+                        hospitalId = request.HospitalId,
+                        doctorId = request.DoctorId
                     });
             }
             catch (Exception ex)
@@ -343,5 +468,356 @@ namespace MHRS.Controllers
                 return StatusCode(500, "Randevu silinirken bir hata oluştu");
             }
         }
+
+        /// <summary>
+        /// Yeni hastane oluşturur
+        /// </summary>
+        [HttpPost("hospital")]
+        public async Task<IActionResult> CreateHospital([FromBody] CreateHospitalRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                // Şehir kontrolü
+                var city = await _context.Cities
+                    .FirstOrDefaultAsync(c => c.CityId == request.CityId);
+
+                if (city == null)
+                {
+                    return NotFound(new { message = "Şehir bulunamadı" });
+                }
+
+                // Aynı adlı hastane var mı kontrol et
+                var existingHospital = await _context.Hospitals
+                    .FirstOrDefaultAsync(h => h.HospitalName.ToLower() == request.HospitalName.ToLower());
+
+                if (existingHospital != null)
+                {
+                    return BadRequest(new { message = "Bu adlı hastane zaten mevcut" });
+                }
+
+                // Yeni hastane oluştur
+                var hospital = new Hospital
+                {
+                    HospitalName = request.HospitalName,
+                    CityId = request.CityId,
+                    Phone = request.Phone,
+                    Address = request.Address,
+                    Description = request.Description,
+                    DistrictName = request.DistrictName
+                };
+
+                _context.Hospitals.Add(hospital);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Yeni hastane eklendi: {hospital.HospitalName} (ID: {hospital.HospitalId})");
+
+                return CreatedAtAction(
+                    nameof(GetHospitalsByCity),
+                    new { cityId = hospital.CityId },
+                    new
+                    {
+                        message = "Hastane başarıyla eklendi",
+                        hospitalId = hospital.HospitalId,
+                        hospitalName = hospital.HospitalName
+                    });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Hastane ekleme hatası");
+                return StatusCode(500, new { message = "Hastane eklenirken bir hata oluştu", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Hastaneyi günceller
+        /// </summary>
+        [HttpPut("hospital/{hospitalId}")]
+        public async Task<IActionResult> UpdateHospital(int hospitalId, [FromBody] CreateHospitalRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var hospital = await _context.Hospitals
+                    .FirstOrDefaultAsync(h => h.HospitalId == hospitalId);
+
+                if (hospital == null)
+                {
+                    return NotFound(new { message = "Hastane bulunamadı" });
+                }
+
+                // Şehir kontrolü
+                var city = await _context.Cities
+                    .FirstOrDefaultAsync(c => c.CityId == request.CityId);
+
+                if (city == null)
+                {
+                    return NotFound(new { message = "Şehir bulunamadı" });
+                }
+
+                hospital.HospitalName = request.HospitalName;
+                hospital.CityId = request.CityId;
+                hospital.Phone = request.Phone;
+                hospital.Address = request.Address;
+                hospital.Description = request.Description;
+                hospital.DistrictName = request.DistrictName;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Hastane güncellendi: {hospital.HospitalName} (ID: {hospitalId})");
+
+                return Ok(new { message = "Hastane başarıyla güncellendi", hospitalId = hospital.HospitalId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Hastane güncelleme hatası");
+                return StatusCode(500, new { message = "Hastane güncellenirken bir hata oluştu" });
+            }
+        }
+
+        /// <summary>
+        /// Hastaneyi siler
+        /// </summary>
+        [HttpDelete("hospital/{hospitalId}")]
+        public async Task<IActionResult> DeleteHospital(int hospitalId)
+        {
+            try
+            {
+                var hospital = await _context.Hospitals
+                    .FirstOrDefaultAsync(h => h.HospitalId == hospitalId);
+
+                if (hospital == null)
+                {
+                    return NotFound(new { message = "Hastane bulunamadı" });
+                }
+
+                // Bu hastaneye ait randevu var mı kontrol et
+                var hasAppointments = await _context.Appointments
+                    .AnyAsync(a => a.HospitalId == hospitalId);
+
+                if (hasAppointments)
+                {
+                    return BadRequest(new { message = "Bu hastaneye ait randevular olduğu için silinemez" });
+                }
+
+                _context.Hospitals.Remove(hospital);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Hastane silindi: {hospital.HospitalName} (ID: {hospitalId})");
+
+                return Ok(new { message = "Hastane başarıyla silindi" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Hastane silme hatası");
+                return StatusCode(500, new { message = "Hastane silinirken bir hata oluştu" });
+            }
+        }
+
+        /// <summary>
+        /// Yeni doktor oluşturur
+        /// </summary>
+        [HttpPost("doctor")]
+        public async Task<IActionResult> CreateDoctor([FromBody] CreateDoctorRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                // Hastane kontrolü
+                var hospital = await _context.Hospitals
+                    .FirstOrDefaultAsync(h => h.HospitalId == request.HospitalId);
+
+                if (hospital == null)
+                {
+                    return NotFound(new { message = "Hastane bulunamadı" });
+                }
+
+                // Yeni doktor oluştur
+                var doctor = new Doctor
+                {
+                    DoctorName = request.DoctorName,
+                    Phone = request.Phone,
+                    HospitalId = request.HospitalId
+                };
+
+                _context.Doctors.Add(doctor);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Yeni doktor eklendi: {doctor.DoctorName} (ID: {doctor.DoctorId})");
+
+                return CreatedAtAction(
+                    nameof(GetDoctorsByHospital),
+                    new { hospitalId = doctor.HospitalId },
+                    new
+                    {
+                        message = "Doktor başarıyla eklendi",
+                        doctorId = doctor.DoctorId,
+                        doctorName = doctor.DoctorName
+                    });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Doktor ekleme hatası");
+                return StatusCode(500, new { message = "Doktor eklenirken bir hata oluştu", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Doktoru günceller
+        /// </summary>
+        [HttpPut("doctor/{doctorId}")]
+        public async Task<IActionResult> UpdateDoctor(int doctorId, [FromBody] CreateDoctorRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var doctor = await _context.Doctors
+                    .FirstOrDefaultAsync(d => d.DoctorId == doctorId);
+
+                if (doctor == null)
+                {
+                    return NotFound(new { message = "Doktor bulunamadı" });
+                }
+
+                // Hastane kontrolü
+                var hospital = await _context.Hospitals
+                    .FirstOrDefaultAsync(h => h.HospitalId == request.HospitalId);
+
+                if (hospital == null)
+                {
+                    return NotFound(new { message = "Hastane bulunamadı" });
+                }
+
+                doctor.DoctorName = request.DoctorName;
+                doctor.Phone = request.Phone;
+                doctor.HospitalId = request.HospitalId;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Doktor güncellendi: {doctor.DoctorName} (ID: {doctorId})");
+
+                return Ok(new { message = "Doktor başarıyla güncellendi", doctorId = doctor.DoctorId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Doktor güncelleme hatası");
+                return StatusCode(500, new { message = "Doktor güncellenirken bir hata oluştu" });
+            }
+        }
+
+        /// <summary>
+        /// Doktoru siler
+        /// </summary>
+        [HttpDelete("doctor/{doctorId}")]
+        public async Task<IActionResult> DeleteDoctor(int doctorId)
+        {
+            try
+            {
+                var doctor = await _context.Doctors
+                    .FirstOrDefaultAsync(d => d.DoctorId == doctorId);
+
+                if (doctor == null)
+                {
+                    return NotFound(new { message = "Doktor bulunamadı" });
+                }
+
+                // Bu doktora ait aktif randevu var mı kontrol et
+                var hasActiveAppointments = await _context.Appointments
+                    .AnyAsync(a => a.DoctorId == doctorId && a.IsDone == false);
+
+                if (hasActiveAppointments)
+                {
+                    return BadRequest(new { message = "Bu doktora ait aktif randevular olduğu için silinemez" });
+                }
+
+                _context.Doctors.Remove(doctor);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Doktor silindi: {doctor.DoctorName} (ID: {doctorId})");
+
+                return Ok(new { message = "Doktor başarıyla silindi" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Doktor silme hatası");
+                return StatusCode(500, new { message = "Doktor silinirken bir hata oluştu" });
+            }
+        }
+
+        /// <summary>
+        /// Tüm doktorları getirir (ADMIN İÇİN)
+        /// </summary>
+        [HttpGet("doctors")]
+        public async Task<ActionResult<IEnumerable<object>>> GetAllDoctors()
+        {
+            try
+            {
+                var doctors = await (from doctor in _context.Doctors
+                                     join hospital in _context.Hospitals
+                                     on doctor.HospitalId equals hospital.HospitalId
+                                     join city in _context.Cities
+                                     on hospital.CityId equals city.CityId
+                                     orderby doctor.DoctorName
+                                     select new
+                                     {
+                                         DoctorId = doctor.DoctorId,
+                                         DoctorName = doctor.DoctorName,
+                                         Phone = doctor.Phone,
+                                         HospitalId = doctor.HospitalId,
+                                         HospitalName = hospital.HospitalName,
+                                         CityName = city.CityName
+                                     }).ToListAsync();
+
+                return Ok(doctors);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Tüm doktorlar getirilirken hata oluştu");
+                return StatusCode(500, "Doktorlar getirilirken bir hata oluştu");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Hastane oluşturma/güncelleme isteği
+    /// </summary>
+    public class CreateHospitalRequest
+    {
+        [Required(ErrorMessage = "Hastane adı zorunludur")]
+        [MaxLength(150)]
+        public string HospitalName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Şehir zorunludur")]
+        public int CityId { get; set; }
+
+        [Required(ErrorMessage = "Telefon zorunludur")]
+        [MaxLength(50)]
+        public string Phone { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Adres zorunludur")]
+        [MaxLength(200)]
+        public string Address { get; set; } = string.Empty;
+
+        [MaxLength(500)]
+        public string Description { get; set; } = string.Empty;
+
+        [MaxLength(100)]
+        public string DistrictName { get; set; } = string.Empty;
     }
 }

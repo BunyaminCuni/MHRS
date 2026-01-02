@@ -199,10 +199,126 @@
         }
       }
     },
-    "/api/Appointment/done": {
+    "/api/Appointment/doctors/{hospitalId}": {
       "get": {
         "tags": [
           "Appointment"
+        ],
+        "parameters": [
+          {
+            "name": "hospitalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Doctor"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Doctor"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Doctor"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Appointment/available-times/{doctorId}/{date}": {
+      "get": {
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Appointment/done/{mobileNo}": {
+      "get": {
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "name": "mobileNo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -237,10 +353,20 @@
         }
       }
     },
-    "/api/Appointment/pending": {
+    "/api/Appointment/pending/{mobileNo}": {
       "get": {
         "tags": [
           "Appointment"
+        ],
+        "parameters": [
+          {
+            "name": "mobileNo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -390,6 +516,226 @@
         }
       }
     },
+    "/api/Appointment/hospital": {
+      "post": {
+        "tags": [
+          "Appointment"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHospitalRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHospitalRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHospitalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Appointment/hospital/{hospitalId}": {
+      "put": {
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "name": "hospitalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHospitalRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHospitalRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHospitalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "name": "hospitalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Appointment/doctor": {
+      "post": {
+        "tags": [
+          "Appointment"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDoctorRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDoctorRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDoctorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Appointment/doctor/{doctorId}": {
+      "put": {
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDoctorRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDoctorRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDoctorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Appointment/doctors": {
+      "get": {
+        "tags": [
+          "Appointment"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Auth/send-otp": {
       "post": {
         "tags": [
@@ -502,6 +848,10 @@
           },
           "IsDone": {
             "type": "boolean"
+          },
+          "DoctorName": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -527,6 +877,104 @@
               "$ref": "#/components/schemas/Hospital"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateDoctorRequest": {
+        "required": [
+          "DoctorName",
+          "HospitalId",
+          "Phone"
+        ],
+        "type": "object",
+        "properties": {
+          "DoctorName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Phone": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string"
+          },
+          "HospitalId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateHospitalRequest": {
+        "required": [
+          "Address",
+          "CityId",
+          "HospitalName",
+          "Phone"
+        ],
+        "type": "object",
+        "properties": {
+          "HospitalName": {
+            "maxLength": 150,
+            "minLength": 1,
+            "type": "string"
+          },
+          "CityId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Phone": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Address": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Description": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          },
+          "DistrictName": {
+            "maxLength": 100,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Doctor": {
+        "required": [
+          "DoctorName",
+          "HospitalId",
+          "Phone"
+        ],
+        "type": "object",
+        "properties": {
+          "DoctorId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "DoctorName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Phone": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string"
+          },
+          "HospitalId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Hospital": {
+            "$ref": "#/components/schemas/Hospital"
           }
         },
         "additionalProperties": false
@@ -575,6 +1023,13 @@
           },
           "City": {
             "$ref": "#/components/schemas/City"
+          },
+          "Doctors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Doctor"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -584,6 +1039,7 @@
           "AppointmentDate",
           "CityId",
           "DistrictName",
+          "DoctorId",
           "HospitalId",
           "MobileNo",
           "PatientName"
@@ -615,6 +1071,10 @@
             "type": "string"
           },
           "HospitalId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "DoctorId": {
             "type": "integer",
             "format": "int32"
           },

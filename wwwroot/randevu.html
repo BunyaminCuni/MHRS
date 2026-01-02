@@ -184,9 +184,25 @@
             </div>
 
             <div class="form-group">
-                <label for="appointmentDate">Randevu Tarihi ve Saati *</label>
-                <input type="datetime-local" id="appointmentDate" name="appointmentDate" required>
+                <label for="doctorId">Doktor *</label>
+                <select id="doctorId" name="doctorId" required>
+                    <option value="">Önce hastane seçiniz</option>
+                </select>
+                <div class="error-message" id="doctorError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="appointmentDate">Randevu Tarihi *</label>
+                <input type="date" id="appointmentDate" name="appointmentDate" required>
                 <div class="error-message" id="dateError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="appointmentTime">Randevu Saati *</label>
+                <select id="appointmentTime" name="appointmentTime" required>
+                    <option value="">Önce tarih ve doktor seçiniz</option>
+                </select>
+                <div class="error-message" id="timeError"></div>
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">Randevu Oluştur</button>
@@ -201,9 +217,12 @@
 
         // Minimum tarih ayarla
         const dateInput = document.getElementById('appointmentDate');
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        dateInput.min = now.toISOString().slice(0, 16);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInput.min = `${yyyy}-${mm}-${dd}`;
 
         function showDebug(message) {
             const debugDiv = document.getElementById('debugInfo');
@@ -270,9 +289,10 @@
             const districtSelect = document.getElementById('districtId');
             districtSelect.innerHTML = '<option value="">İlçe seçiniz</option>';
 
-            // Hastane dropdown'unu da temizle
-            const hospitalSelect = document.getElementById('hospitalId');
-            hospitalSelect.innerHTML = '<option value="">Önce ilçe seçiniz</option>';
+            // Hastane, doktor, tarih ve saat dropdown'larını temizle
+            document.getElementById('hospitalId').innerHTML = '<option value="">Önce ilçe seçiniz</option>';
+            document.getElementById('doctorId').innerHTML = '<option value="">Önce hastane seçiniz</option>';
+            document.getElementById('appointmentTime').innerHTML = '<option value="">Önce tarih ve doktor seçiniz</option>';
 
             if (!cityId) {
                 showDebug('⚠️ Geçerli şehir seçilmedi');
@@ -327,6 +347,10 @@
             const hospitalSelect = document.getElementById('hospitalId');
             hospitalSelect.innerHTML = '<option value="">Hastane seçiniz</option>';
 
+            // Doktor, tarih ve saat dropdown'larını temizle
+            document.getElementById('doctorId').innerHTML = '<option value="">Önce hastane seçiniz</option>';
+            document.getElementById('appointmentTime').innerHTML = '<option value="">Önce tarih ve doktor seçiniz</option>';
+
             if (!cityId || !districtName) {
                 showDebug('⚠️ Geçerli şehir veya ilçe seçilmedi');
                 return;
@@ -370,6 +394,111 @@
             }
         });
 
+        // Hastane değiştiğinde doktorları getir
+        document.getElementById('hospitalId').addEventListener('change', async function () {
+            const hospitalId = this.value;
+
+            showDebug(`👨‍⚕️ Hastane seçildi - HospitalId: ${hospitalId}`);
+
+            const doctorSelect = document.getElementById('doctorId');
+            doctorSelect.innerHTML = '<option value="">Doktor seçiniz</option>';
+
+            // Saat dropdown'unu temizle
+            document.getElementById('appointmentTime').innerHTML = '<option value="">Önce tarih ve doktor seçiniz</option>';
+
+            if (!hospitalId) {
+                showDebug('⚠️ Geçerli hastane seçilmedi');
+                return;
+            }
+
+            try {
+                showDebug(`👨‍⚕️ Doktorlar yükleniyor (Hastane ID: ${hospitalId})...`);
+
+                const response = await fetch(`${API_BASE_URL}/Appointment/doctors/${hospitalId}`);
+
+                showDebug(`📡 Yanıt status: ${response.status}`);
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showDebug('❌ Bu hastanede doktor bulunamadı');
+                        doctorSelect.innerHTML = '<option value="">Bu hastanede doktor yok</option>';
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const doctors = await response.json();
+                showDebug('✅ Doktorlar yüklendi: ' + doctors.length);
+
+                if (doctors.length === 0) {
+                    doctorSelect.innerHTML = '<option value="">Doktor bulunamadı</option>';
+                    return;
+                }
+
+                doctors.forEach(doctor => {
+                    const option = document.createElement('option');
+                    option.value = doctor.DoctorId;
+                    option.textContent = doctor.DoctorName;
+                    doctorSelect.appendChild(option);
+                });
+
+                showDebug('✅ Doktor dropdown\'u dolduruldu (' + doctors.length + ' doktor)');
+            } catch (error) {
+                showDebug('❌ Doktorlar yüklenemedi: ' + error.message);
+                doctorSelect.innerHTML = '<option value="">Doktor yüklenemedi</option>';
+            }
+        });
+
+        // Tarih veya doktor değiştiğinde müsait saatleri getir
+        async function loadAvailableTimes() {
+            const doctorId = document.getElementById('doctorId').value;
+            const appointmentDate = document.getElementById('appointmentDate').value;
+
+            const timeSelect = document.getElementById('appointmentTime');
+            timeSelect.innerHTML = '<option value="">Saat seçiniz</option>';
+
+            if (!doctorId || !appointmentDate) {
+                showDebug('⚠️ Doktor veya tarih seçilmedi');
+                return;
+            }
+
+            try {
+                showDebug(`🕐 Müsait saatler yükleniyor (Doktor: ${doctorId}, Tarih: ${appointmentDate})...`);
+
+                const response = await fetch(`${API_BASE_URL}/Appointment/available-times/${doctorId}/${appointmentDate}`);
+
+                showDebug(`📡 Yanıt status: ${response.status}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const times = await response.json();
+                showDebug('✅ Müsait saatler yüklendi: ' + times.length);
+
+                if (times.length === 0) {
+                    timeSelect.innerHTML = '<option value="">Bu tarihte müsait saat yok</option>';
+                    showError('Seçilen tarihte müsait saat bulunmamaktadır. Lütfen farklı bir tarih seçin.');
+                    return;
+                }
+
+                times.forEach(time => {
+                    const option = document.createElement('option');
+                    option.value = time;
+                    option.textContent = time;
+                    timeSelect.appendChild(option);
+                });
+
+                showDebug('✅ Saat dropdown\'u dolduruldu (' + times.length + ' saat)');
+            } catch (error) {
+                showDebug('❌ Müsait saatler yüklenemedi: ' + error.message);
+                timeSelect.innerHTML = '<option value="">Saat yüklenemedi</option>';
+            }
+        }
+
+        document.getElementById('doctorId').addEventListener('change', loadAvailableTimes);
+        document.getElementById('appointmentDate').addEventListener('change', loadAvailableTimes);
+
         // Form gönderme
         document.getElementById('appointmentForm').addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -385,9 +514,14 @@
             const email = document.getElementById('email').value.trim();
             const cityId = parseInt(document.getElementById('cityId').value);
             const hospitalId = parseInt(document.getElementById('hospitalId').value);
+            const doctorId = parseInt(document.getElementById('doctorId').value);
             const appointmentDate = document.getElementById('appointmentDate').value;
+            const appointmentTime = document.getElementById('appointmentTime').value;
 
+            // Tarih ve saati birleştir
+            const dateTimeParts = appointmentTime.split(':');
             const dateObj = new Date(appointmentDate);
+            dateObj.setHours(parseInt(dateTimeParts[0]), parseInt(dateTimeParts[1]), 0, 0);
             const isoDate = dateObj.toISOString();
 
             const districtName = document.getElementById('districtId').value;
@@ -399,6 +533,7 @@
                 CityId: cityId,
                 DistrictName: districtName,
                 HospitalId: hospitalId,
+                DoctorId: doctorId,
                 AppointmentDate: isoDate,
                 PatientId: 0
             };
@@ -485,6 +620,7 @@
                 showFieldError('cityError', 'Şehir zorunludur');
                 isValid = false;
             }
+
             if (!data.DistrictName) {
                 showFieldError('districtError', 'İlçe zorunludur');
                 isValid = false;
@@ -492,6 +628,11 @@
 
             if (!data.HospitalId || data.HospitalId === 0) {
                 showFieldError('hospitalError', 'Hastane zorunludur');
+                isValid = false;
+            }
+
+            if (!data.DoctorId || data.DoctorId === 0) {
+                showFieldError('doctorError', 'Doktor zorunludur');
                 isValid = false;
             }
 

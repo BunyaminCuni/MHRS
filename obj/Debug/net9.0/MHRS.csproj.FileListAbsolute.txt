@@ -158,8 +158,9 @@ C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\bin\Debug\net9.0\MHRS.staticweba
 C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\ulqiuv4lfs-eoe1zw5ndz.gz
 C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\dl00vi1hsl-2jz6pqx1ob.gz
 C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
-C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\ht4peyyd11-pikvcik0a4.gz
-C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\kp8dfhzsow-3ofjhq2d3l.gz
 C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\ouo3jbx242-qjrqufgbz7.gz
-C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\i50vomfg8l-qrb2m3hqsr.gz
-C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\dg2bpnxiau-jxkyjtq70w.gz
+C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\MHRS.sourcelink.json
+C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\kp8dfhzsow-dhwe6pv5tt.gz
+C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\i50vomfg8l-9tjfbr483k.gz
+C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\ht4peyyd11-tuxfu56jdx.gz
+C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\obj\Debug\net9.0\compressed\dg2bpnxiau-lxl04s7dqg.gz

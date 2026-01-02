@@ -50,7 +50,7 @@ namespace MHRS.Services
                         IsBodyHtml = true
                     };
 
-                    mailMessage.To.Add(email); // Parametreden gelen email'i kullan
+                    mailMessage.To.Add(email);
 
                     await client.SendMailAsync(mailMessage);
                     _logger.LogInformation($"OTP emaili başarıyla gönderildi: {email}");

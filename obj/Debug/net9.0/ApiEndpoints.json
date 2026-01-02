@@ -69,6 +69,37 @@
   },
   {
     "ContainingType": "MHRS.Controllers.AppointmentController",
+    "Method": "GetAvailableTimes",
+    "RelativePath": "api/Appointment/available-times/{doctorId}/{date}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "doctorId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "date",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "MHRS.Controllers.AppointmentController",
     "Method": "GetAllCities",
     "RelativePath": "api/Appointment/cities",
     "HttpMethod": "GET",
@@ -115,12 +146,117 @@
   },
   {
     "ContainingType": "MHRS.Controllers.AppointmentController",
-    "Method": "GetDoneAppointments",
-    "RelativePath": "api/Appointment/done",
+    "Method": "CreateDoctor",
+    "RelativePath": "api/Appointment/doctor",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "MHRS.Model.CreateDoctorRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MHRS.Controllers.AppointmentController",
+    "Method": "UpdateDoctor",
+    "RelativePath": "api/Appointment/doctor/{doctorId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "doctorId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "MHRS.Model.CreateDoctorRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MHRS.Controllers.AppointmentController",
+    "Method": "DeleteDoctor",
+    "RelativePath": "api/Appointment/doctor/{doctorId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "doctorId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MHRS.Controllers.AppointmentController",
+    "Method": "GetAllDoctors",
+    "RelativePath": "api/Appointment/doctors",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[System.Object, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "MHRS.Controllers.AppointmentController",
+    "Method": "GetDoctorsByHospital",
+    "RelativePath": "api/Appointment/doctors/{hospitalId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "hospitalId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[MHRS.Model.Doctor, MHRS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "MHRS.Controllers.AppointmentController",
+    "Method": "GetDoneAppointments",
+    "RelativePath": "api/Appointment/done/{mobileNo}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "mobileNo",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": [
       {
         "Type": "System.Collections.Generic.IEnumerable\u00601[[MHRS.Model.AppointmentResponseDto, MHRS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
@@ -132,6 +268,59 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "MHRS.Controllers.AppointmentController",
+    "Method": "CreateHospital",
+    "RelativePath": "api/Appointment/hospital",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "MHRS.Controllers.CreateHospitalRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MHRS.Controllers.AppointmentController",
+    "Method": "UpdateHospital",
+    "RelativePath": "api/Appointment/hospital/{hospitalId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "hospitalId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "MHRS.Controllers.CreateHospitalRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MHRS.Controllers.AppointmentController",
+    "Method": "DeleteHospital",
+    "RelativePath": "api/Appointment/hospital/{hospitalId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "hospitalId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "MHRS.Controllers.AppointmentController",
@@ -193,11 +382,17 @@
   {
     "ContainingType": "MHRS.Controllers.AppointmentController",
     "Method": "GetPendingAppointments",
-    "RelativePath": "api/Appointment/pending",
+    "RelativePath": "api/Appointment/pending/{mobileNo}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "mobileNo",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": [
       {
         "Type": "System.Collections.Generic.IEnumerable\u00601[[MHRS.Model.AppointmentResponseDto, MHRS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",

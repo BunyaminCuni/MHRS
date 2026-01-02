@@ -14,6 +14,7 @@ namespace MHRS.Model
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<Hospital> Hospitals { get; set; }
+        public DbSet<Doctor> Doctors { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,6 +34,20 @@ namespace MHRS.Model
                 .WithMany(c => c.Hospitals)
                 .HasForeignKey(h => h.CityId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Doctor - Hospital ilişkisi
+            modelBuilder.Entity<Doctor>()
+                .HasOne(d => d.Hospital)
+                .WithMany(h => h.Doctors)
+                .HasForeignKey(d => d.HospitalId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Appointment - Doctor ilişkisi
+            modelBuilder.Entity<Appointment>()
+                .HasOne<Doctor>()
+                .WithMany()
+                .HasForeignKey(a => a.DoctorId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Örnek şehirler ekle
             // Türkiye'nin resmi 81 ili (Plaka kodlarına göre)
@@ -130,7 +145,8 @@ namespace MHRS.Model
                     CityId = 34,
                     Phone = "0212-555-0001",
                     Address = "İstanbul, Kadıköy",
-                    Description = "Modern veteriner hastanesi"
+                    Description = "Modern veteriner hastanesi",
+                    DistrictName = "Kadıköy"
                 },
                 new Hospital
                 {
@@ -139,7 +155,8 @@ namespace MHRS.Model
                     CityId = 34,
                     Phone = "0212-555-0002",
                     Address = "İstanbul, Nişantaşı",
-                    Description = "Uluslararası standartlarda hizmet"
+                    Description = "Uluslararası standartlarda hizmet",
+                    DistrictName = "Şişli"
                 },
                 new Hospital
                 {
@@ -148,7 +165,8 @@ namespace MHRS.Model
                     CityId = 6,
                     Phone = "0312-555-0001",
                     Address = "Ankara, Keçiören",
-                    Description = "Ankara'nın en iyi veteriner merkezi"
+                    Description = "Ankara'nın en iyi veteriner merkezi",
+                    DistrictName = "Keçiören"
                 },
                 new Hospital
                 {
@@ -157,7 +175,8 @@ namespace MHRS.Model
                     CityId = 35,
                     Phone = "0232-555-0001",
                     Address = "İzmir, Alsancak",
-                    Description = "Evcil hayvanlar için özel hizmetler"
+                    Description = "Evcil hayvanlar için özel hizmetler",
+                    DistrictName = "Konak"
                 },
                 new Hospital
                 {
@@ -166,7 +185,8 @@ namespace MHRS.Model
                     CityId = 59,
                     Phone = "0282-555-0001",
                     Address = "Tekirdağ, Merkez",
-                    Description = "Tekirdağ'da güvenilir veteriner hizmeti"
+                    Description = "Tekirdağ'da güvenilir veteriner hizmeti",
+                    DistrictName = "Süleymanpaşa"
                 }
             );
         }
@@ -198,7 +218,7 @@ namespace MHRS.Model
         public int HospitalId { get; set; }
 
         [Required]
-        [MaxLength(150)]  // 100'den 150'ye değiştirildi
+        [MaxLength(150)]
         [Column("hospitalName")]
         public string HospitalName { get; set; } = string.Empty;
 
@@ -227,6 +247,36 @@ namespace MHRS.Model
         // Foreign Key ilişkisi
         [ForeignKey("CityId")]
         public City City { get; set; }
+
+        // İlişki: Bir hastanede birden fazla doktor olabilir
+        public ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
+    }
+
+    [Table("doctors")]
+    public class Doctor
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("doctorId")]
+        public int DoctorId { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        [Column("doctorName")]
+        public string DoctorName { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(20)]
+        [Column("phone")]
+        public string Phone { get; set; } = string.Empty;
+
+        [Required]
+        [Column("hospitalId")]
+        public int HospitalId { get; set; }
+
+        // Foreign Key ilişkisi
+        [ForeignKey("HospitalId")]
+        public Hospital Hospital { get; set; }
     }
 
     [Table("patient")]
@@ -285,6 +335,9 @@ namespace MHRS.Model
         [Required]
         [Column("hospitalId")]
         public int HospitalId { get; set; }
+
+        [Column("doctorId")]
+        public int? DoctorId { get; set; }
     }
 
     public class NewAppointmentRequest
@@ -302,12 +355,16 @@ namespace MHRS.Model
 
         [Required(ErrorMessage = "Şehir zorunludur")]
         public int CityId { get; set; }
+
         [Required(ErrorMessage = "İlçe zorunludur")]
         [MaxLength(100)]
         public string DistrictName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Hastane zorunludur")]
         public int HospitalId { get; set; }
+
+        [Required(ErrorMessage = "Doktor zorunludur")]
+        public int DoctorId { get; set; }
 
         [MaxLength(50)]
         [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz")]
@@ -325,5 +382,20 @@ namespace MHRS.Model
         public int AppointmentId { get; set; }
         public DateTime AppointmentDate { get; set; }
         public bool IsDone { get; set; }
+        public string? DoctorName { get; set; }
+    }
+
+    public class CreateDoctorRequest
+    {
+        [Required(ErrorMessage = "Doktor adı zorunludur")]
+        [MaxLength(100)]
+        public string DoctorName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Telefon zorunludur")]
+        [MaxLength(20)]
+        public string Phone { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Hastane zorunludur")]
+        public int HospitalId { get; set; }
     }
 }

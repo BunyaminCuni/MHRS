@@ -2,406 +2,241 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/giris.css">
-    <title>Evcil Hayvan Randevu Sistemi</title>
+    <link rel="stylesheet" href="css/anasayfa.css">
+    <title>EHRS Anasayfa</title>
 </head>
 <body>
-    <div class="wrapper">
+    <header class="header">
+        <a href="anasayfa.html" class="fotograflar">
+            <img src="fotograflar/logo.png" alt="Logo">
+        </a>
         <nav class="nav">
-            <div class="nav-button">
-                <button class="btn white-btn" id="loginBtn" onclick="showLoginForm()">Giriş Yap</button>
-                <button class="btn" id="registerBtn" onclick="showRegisterForm()">Kayıt Ol</button>
-            </div>
-            <div class="nav-menu-btn">
-                <i class="bx bx-menu" onclick="myMenuFunction()"></i>
-            </div>
+            <a href="#">Veteriner Hastaneleri</a>
+            <a href="#">Özel Klinikler</a>
+            <a href="#">Nöbetçi Veterinerler</a>
         </nav>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span id="userName" style="color: #333; font-weight: 600;"></span>
+            <button onclick="logout()" style="background: #d32f2f; color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">Çıkış Yap</button>
+        </div>
+    </header>
 
-        <div class="form-box">
+    <section class="anasayfa">
+        <div class="site-inner">
+            <a class="content btn-red" href="randevu.html">
+                <div class="card">
+                    <h3 class="card-title">Hastane Randevusu Al</h3>
+                    <p class="desc">Evcil hayvanınız için en yakın veteriner hastanesinden randevu alın.</p>
+                </div>
+            </a>
 
-            <!-- GİRİŞ FORMU -->
-            <div class="login-container" id="login">
-                <div class="top">
-                    <span>Hesabınız Yok mu? <a href="#" onclick="showRegisterForm()">Kayıt Ol</a></span>
-                    <header>Giriş Yap</header>
+            <a class="content btn-blue" href="randevu.html">
+                <div class="card">
+                    <h3 class="card-title">Özel Klinik Randevusu Al</h3>
+                    <p class="desc">Evcil hayvanınız için en yakın özel klinik randevusu alın.</p>
                 </div>
-                <form id="loginForm" onsubmit="handleLogin(event)">
-                    <div class="input-box">
-                        <input type="text" class="input-field" id="loginPhone" placeholder="Telefon Numarası" required>
-                        <i class="bx bx-user"></i>
-                    </div>
-                    <div class="input-box">
-                        <input type="password" class="input-field" id="loginPassword" placeholder="Şifre" required>
-                        <i class="bx bx-lock-alt"></i>
-                    </div>
-                    <div class="input-box">
-                        <input type="submit" class="submit" value="Giriş Yap">
-                    </div>
-                    <div class="two-col">
-                        <div class="one">
-                            <input type="checkbox" id="login-check">
-                            <label for="login-check"> Beni Hatırla</label>
-                        </div>
-                        <div class="two">
-                            <label><a href="#" onclick="debugStorage()">Şifremi Unuttum?</a></label>
-                        </div>
-                    </div>
-                </form>
-                <!-- DEBUG BUTTON (Geliştirme için - sonra silebilirsiniz) -->
-                <div style="margin-top: 20px; text-align: center;">
-                    <button onclick="debugStorage()" style="background: rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 20px; border: none; cursor: pointer; font-size: 12px;">
-                        🔍 Debug - Kayıtlı Kullanıcıları Göster
-                    </button>
-                </div>
+            </a>
+        </div>
+    </section>
+
+    <div class="container">
+        <h1 class="title">Randevu Bilgilerim</h1>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('current')">Randevularım</button>
+            <button class="tab" onclick="showTab('past')">Geçmiş Randevularım</button>
+        </div>
+
+        <div id="current" class="tab-content active">
+            <div id="currentAppointments">
+                <p style="text-align: center; padding: 20px;">Yükleniyor...</p>
             </div>
+        </div>
 
-            <!-- KAYIT FORMU -->
-            <div class="register-container" id="register">
-                <div class="top">
-                    <span>Hesabınız Var mı? <a href="#" onclick="showLoginForm()">Giriş Yap</a></span>
-                    <header>Kayıt Ol</header>
-                </div>
-                <form id="registerForm" onsubmit="handleRegister(event)">
-                    <div class="two-forms">
-                        <div class="input-box">
-                            <input type="text" class="input-field" id="registerFirstName" placeholder="Ad" required>
-                            <i class="bx bx-user"></i>
-                        </div>
-                        <div class="input-box">
-                            <input type="text" class="input-field" id="registerLastName" placeholder="Soyad" required>
-                            <i class="bx bx-user"></i>
-                        </div>
-                    </div>
-                    <div class="input-box">
-                        <input type="tel" class="input-field phone" id="registerPhone"
-                               placeholder="5xxxxxxxxx" inputmode="numeric"
-                               pattern="[0-9]*" maxlength="10" required
-                               oninput="this.value = this.value.replace(/\D/g, '')">
-                        <i class="bx bx-phone"></i>
-                    </div>
-                    <div class="input-box">
-                        <input type="email" class="input-field" id="registerEmail" placeholder="Email" required>
-                        <i class="bx bx-envelope"></i>
-                    </div>
-                    <div class="input-box">
-                        <input type="password" class="input-field" id="registerPassword"
-                               placeholder="Şifre (min 6 karakter)" required minlength="6">
-                        <i class="bx bx-lock-alt"></i>
-                    </div>
-                    <div class="input-box">
-                        <input type="submit" class="submit" value="Kayıt Ol">
-                    </div>
-                    <div class="two-col">
-                        <div class="one">
-                            <input type="checkbox" id="register-check" required>
-                            <label for="register-check"> Şartlar ve Koşulları Kabul Ediyorum</label>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <!-- OTP DOĞRULAMA FORMU -->
-            <div class="register-container" id="otp-verify" style="display: none; position: absolute; left: -510px; right: auto; opacity: 0; transition: .5s ease-in-out;">
-                <div class="top">
-                    <span>Geri dönmek ister misin? <a href="#" onclick="showRegisterForm()">Kayıt Ol</a></span>
-                    <header>Email Doğrulama</header>
-                </div>
-                <form id="otpForm" onsubmit="handleOtpVerify(event)">
-                    <div class="input-box">
-                        <input type="text" class="input-field" id="otpCode" placeholder="6 haneli kodu girin" maxlength="6" required>
-                        <i class="bx bx-lock-alt"></i>
-                    </div>
-                    <div class="input-box">
-                        <input type="submit" class="submit" value="Doğrula">
-                    </div>
-                    <div style="text-align: center; margin-top: 10px;">
-                        <small id="otpMessage" style="color: #fff;"></small>
-                    </div>
-                </form>
+        <div id="past" class="tab-content">
+            <div id="pastAppointments">
+                <p style="text-align: center; padding: 20px;">Yükleniyor...</p>
             </div>
         </div>
     </div>
 
     <script>
         const API_BASE_URL = 'https://localhost:7116/api';
-        let registrationEmail = '';
-        let registrationFirstName = '';
-        let registrationLastName = '';
-        let registrationPhone = '';
-        let registrationPassword = '';
 
         // ============================================
-        // MENU FONKSİYONLARI
+        // OTURUM KONTROLÜ
         // ============================================
-        function myMenuFunction() {
-            var i = document.getElementById("navMenu");
-            if (i && i.className === "nav-menu") {
-                i.className += " responsive";
-            } else if (i) {
-                i.className = "nav-menu";
+        function checkSession() {
+            const currentUser = sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser');
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            return true;
+        }
+
+        // ============================================
+        // OTURUM KAPAT
+        // ============================================
+        function logout() {
+            if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+                sessionStorage.removeItem('currentUser');
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
             }
         }
 
         // ============================================
-        // FORM GEÇİŞ FONKSİYONLARI
+        // SEKME GÖSTERİMİ
         // ============================================
-        var a = document.getElementById("loginBtn");
-        var b = document.getElementById("registerBtn");
-        var x = document.getElementById("login");
-        var y = document.getElementById("register");
-        var z = document.getElementById("otp-verify");
+        function showTab(tabName) {
+            document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
 
-        function showLoginForm() {
-            x.style.left = "4px";
-            x.style.opacity = 1;
-            y.style.right = "-520px";
-            y.style.opacity = 0;
-            z.style.left = "-510px";
-            z.style.opacity = 0;
-            a.className = "btn white-btn";
-            b.className = "btn";
-        }
-
-        function showRegisterForm() {
-            x.style.left = "-510px";
-            x.style.opacity = 0;
-            y.style.right = "5px";
-            y.style.opacity = 1;
-            z.style.left = "-510px";
-            z.style.opacity = 0;
-            a.className = "btn";
-            b.className = "btn white-btn";
-        }
-
-        function showOtpForm() {
-            x.style.left = "-510px";
-            x.style.opacity = 0;
-            y.style.right = "-520px";
-            y.style.opacity = 0;
-            z.style.left = "4px";
-            z.style.opacity = 1;
+            document.getElementById(tabName).classList.add("active");
+            event.target.classList.add("active");
         }
 
         // ============================================
-        // DEBUG FONKSİYONU - Kayıtlı kullanıcıları göster
+        // RANDEVU YÜKLEMESİ (KULLANICİNİN KENDİ RANDEVULARI)
         // ============================================
-        function debugStorage() {
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-
-            if (users.length === 0) {
-                alert('Henüz kayıtlı kullanıcı yok.');
-                return;
-            }
-
-            let message = '📋 Kayıtlı Kullanıcılar:\n\n';
-            users.forEach((user, index) => {
-                message += `${index + 1}. ${user.firstName} ${user.lastName}\n`;
-                message += `   Tel: ${user.phone}\n`;
-                message += `   Email: ${user.email}\n`;
-                message += `   Şifre: ${user.password}\n\n`;
-            });
-
-            alert(message);
-            console.log('Tüm Kullanıcılar:', users);
-        }
-
-        // ============================================
-        // KAYIT FONKSİYONU
-        // ============================================
-        async function handleRegister(event) {
-            event.preventDefault();
-
-            registrationFirstName = document.getElementById('registerFirstName').value.trim();
-            registrationLastName = document.getElementById('registerLastName').value.trim();
-            registrationPhone = document.getElementById('registerPhone').value.trim();
-            registrationEmail = document.getElementById('registerEmail').value.trim();
-            registrationPassword = document.getElementById('registerPassword').value;
-
-            // Telefon numarası kontrolü
-            if (registrationPhone.length !== 10) {
-                alert('❌ Telefon numarası 10 haneli olmalıdır (örnek: 5551234567)');
-                return;
-            }
-
-            // LocalStorage'dan kullanıcıları al
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-
-            // Aynı telefon numarasına sahip kullanıcı var mı kontrol et
-            const existingUser = users.find(u => u.phone === registrationPhone);
-
-            if (existingUser) {
-                alert('❌ Bu telefon numarası ile kayıtlı bir kullanıcı bulunmaktadır!\n\nTelefon: ' + registrationPhone);
-                console.log('Mevcut kullanıcı:', existingUser);
-                return;
-            }
-
-            console.log('✅ Kayıt doğrulaması başarılı');
-
-            // OTP gönder
-            await sendOtp(registrationEmail);
-
-            // Formu temizle
-            document.getElementById('registerForm').reset();
-        }
-
-        // ============================================
-        // OTP GÖNDERME
-        // ============================================
-        async function sendOtp(email) {
-            registrationEmail = email;
+        async function loadAppointments() {
             try {
-                const response = await fetch(`${API_BASE_URL}/Auth/send-otp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
+                // Giriş yapan kullanıcının telefon numarasını al
+                const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser') || '{}');
+                const userPhone = currentUser.phone;
+
+                if (!userPhone) {
+                    console.error('Kullanıcı telefon numarası bulunamadı');
+                    document.getElementById('currentAppointments').innerHTML =
+                        '<p style="text-align: center; color: red;">Kullanıcı bilgileri yüklenemedi.</p>';
+                    return;
+                }
+
+                console.log('📱 Yüklenen telefon:', userPhone);
+
+                // Kullanıcının bekleyen randevuları
+                console.log(`📡 ${userPhone} için pending randevular isteniyor...`);
+                const pendingResponse = await fetch(`${API_BASE_URL}/Appointment/pending/${userPhone}`);
+                console.log('✅ Pending response:', pendingResponse.status);
+                const pendingData = await pendingResponse.json();
+                console.log('📦 Pending data:', pendingData);
+                displayPendingAppointments(pendingData);
+
+                // Kullanıcının tamamlanmış randevuları
+                console.log(`📡 ${userPhone} için done randevular isteniyor...`);
+                const doneResponse = await fetch(`${API_BASE_URL}/Appointment/done/${userPhone}`);
+                console.log('✅ Done response:', doneResponse.status);
+                const doneData = await doneResponse.json();
+                console.log('📦 Done data:', doneData);
+                displayDoneAppointments(doneData);
+            } catch (error) {
+                console.error('❌ HATA:', error);
+                document.getElementById('currentAppointments').innerHTML =
+                    '<p style="text-align: center; color: red;">Randevular yüklenirken bir hata oluştu: ' + error.message + '</p>';
+                document.getElementById('pastAppointments').innerHTML =
+                    '<p style="text-align: center; color: red;">Randevular yüklenirken bir hata oluştu: ' + error.message + '</p>';
+            }
+        }
+
+        function displayPendingAppointments(appointments) {
+            const container = document.getElementById('currentAppointments');
+
+            if (appointments.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 20px;">Aktif randevunuz bulunmamaktadır.</p>';
+                return;
+            }
+
+            container.innerHTML = appointments.map(apt => `
+                                    <div class="card">
+                                        <h3>${apt.PatientName}</h3>
+                                        <p><strong>Tarih:</strong> ${formatDate(apt.AppointmentDate)}</p>
+                                        <p><strong>Saat:</strong> ${formatTime(apt.AppointmentDate)}</p>
+                                        ${apt.DoctorName ? `<p><strong>Doktor:</strong> ${apt.DoctorName}</p>` : ''}
+                                        <p><strong>Telefon:</strong> ${apt.MobileNo}</p>
+                                        <p><strong>Şehir:</strong> ${apt.City}</p>
+                                        <button class="cancel" onclick="cancelAppointment(${apt.AppointmentId})">Randevuyu İptal Et</button>
+                                    </div>
+                                `).join('');
+        }
+
+        function displayDoneAppointments(appointments) {
+            const container = document.getElementById('pastAppointments');
+
+            if (appointments.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 20px;">Geçmiş randevunuz bulunmamaktadır.</p>';
+                return;
+            }
+
+            container.innerHTML = appointments.map(apt => `
+                                    <div class="card">
+                                        <h3>${apt.PatientName}</h3>
+                                        <p><strong>Tarih:</strong> ${formatDate(apt.AppointmentDate)}</p>
+                                        <p><strong>Saat:</strong> ${formatTime(apt.AppointmentDate)}</p>
+                                        ${apt.DoctorName ? `<p><strong>Doktor:</strong> ${apt.DoctorName}</p>` : ''}
+                                        <p><strong>Telefon:</strong> ${apt.MobileNo}</p>
+                                        <p><strong>Durum:</strong> Tamamlandı</p>
+                                    </div>
+                                `).join('');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        async function cancelAppointment(appointmentId) {
+            if (!confirm('Bu randevuyu iptal etmek istediğinizden emin misiniz?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/Appointment/${appointmentId}`, {
+                    method: 'DELETE'
                 });
 
                 if (response.ok) {
-                    showOtpForm();
-                    alert(`✅ OTP kodunuz ${email}'e gönderilmiştir!\n\nLütfen gelen emaili kontrol edin.`);
+                    alert('Randevu başarıyla iptal edildi.');
+                    loadAppointments();
                 } else {
-                    alert('❌ Email gönderilemedi. Lütfen email adresinizi kontrol edin.');
+                    const error = await response.json();
+                    alert('Randevu iptal edilemedi: ' + (error.message || 'Bilinmeyen hata'));
                 }
             } catch (error) {
-                alert('❌ Hata: ' + error.message);
-            }
-        }
-
-        // ============================================
-        // OTP DOĞRULAMA
-        // ============================================
-        async function handleOtpVerify(event) {
-            event.preventDefault();
-
-            const otp = document.getElementById('otpCode').value;
-            const messageEl = document.getElementById('otpMessage');
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/Auth/verify-otp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: registrationEmail,
-                        otp
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.verified) {
-                    // HESABI BURDA OLUŞTUR
-                    const users = JSON.parse(localStorage.getItem('users') || '[]');
-                    const newUser = {
-                        firstName: registrationFirstName,
-                        lastName: registrationLastName,
-                        phone: registrationPhone,
-                        email: registrationEmail,
-                        password: registrationPassword,
-                        createdAt: new Date().toISOString()
-                    };
-                    users.push(newUser);
-                    localStorage.setItem('users', JSON.stringify(users));
-
-                    console.log('✅ Yeni kullanıcı kaydedildi (OTP doğrulandı):', newUser);
-
-                    messageEl.textContent = '✅ Email doğrulandı! Giriş yapabilirsiniz.';
-                    messageEl.style.color = '#4caf50';
-
-                    setTimeout(() => {
-                        showLoginForm();
-                        alert('✅ Hesabınız aktif edildi!\n\nLütfen telefon numaranız ve şifreniz ile giriş yapınız.');
-                    }, 2000);
-                } else {
-                    messageEl.textContent = '❌ ' + data.message;
-                    messageEl.style.color = '#f44336';
-                }
-            } catch (error) {
-                messageEl.textContent = '❌ Hata: ' + error.message;
-                messageEl.style.color = '#f44336';
-            }
-        }
-
-        // ============================================
-        // GİRİŞ FONKSİYONU
-        // ============================================
-        function handleLogin(event) {
-            event.preventDefault();
-
-            const phone = document.getElementById('loginPhone').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-
-            console.log('🔐 Giriş denemesi:', { phone, password });
-
-            // LocalStorage'dan kullanıcıları al
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            console.log('📋 Kayıtlı kullanıcı sayısı:', users.length);
-
-            // Kullanıcıyı bul
-            const user = users.find(u => {
-                const phoneMatch = u.phone === phone;
-                const passwordMatch = u.password === password;
-
-                console.log(`Kontrol ediliyor: ${u.phone}`);
-                console.log(`  - Telefon eşleşmesi: ${phoneMatch}`);
-                console.log(`  - Şifre eşleşmesi: ${passwordMatch}`);
-
-                return phoneMatch && passwordMatch;
-            });
-
-            if (user) {
-                console.log('✅ Kullanıcı bulundu:', user);
-
-                // Kullanıcı bilgilerini sessionStorage'a kaydet
-                const currentUser = {
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    phone: user.phone,
-                    email: user.email,
-                    loginTime: new Date().toISOString()
-                };
-
-                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-                // "Beni Hatırla" işaretliyse localStorage'a da kaydet
-                if (document.getElementById('login-check').checked) {
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    console.log('💾 Kullanıcı "Beni Hatırla" ile kaydedildi');
-                }
-
-                alert(`✅ Hoş geldiniz, ${user.firstName} ${user.lastName}!`);
-                window.location.href = 'anasayfa.html';
-            } else {
-                console.log('❌ Kullanıcı bulunamadı');
-
-                // Detaylı hata mesajı
-                const phoneExists = users.some(u => u.phone === phone);
-
-                if (phoneExists) {
-                    alert('❌ Şifre hatalı!\n\nLütfen şifrenizi kontrol edin.');
-                } else {
-                    alert('❌ Bu telefon numarası ile kayıtlı kullanıcı bulunamadı!\n\nTelefon: ' + phone + '\n\nLütfen önce kayıt olun veya telefon numaranızı kontrol edin.');
-                }
+                console.error('Randevu iptal edilirken hata:', error);
+                alert('Randevu iptal edilirken bir hata oluştu.');
             }
         }
 
         // ============================================
         // SAYFA YÜKLENDİĞİNDE
         // ============================================
-        window.addEventListener('DOMContentLoaded', function () {
-            // "Beni Hatırla" kontrolü
-            const rememberedUser = localStorage.getItem('currentUser');
-            if (rememberedUser) {
-                console.log('💾 Hatırlanan kullanıcı bulundu, yönlendiriliyor...');
-                window.location.href = 'anasayfa.html';
+        document.addEventListener('DOMContentLoaded', function () {
+            // Oturum kontrolü yap
+            if (!checkSession()) {
+                return;
             }
 
-            // Debug: Kayıtlı kullanıcıları konsola yazdır
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            console.log('📋 Sistemde kayıtlı kullanıcılar:', users);
+            // Kullanıcı adını göster
+            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser') || '{}');
+            if (currentUser.firstName) {
+                document.getElementById('userName').textContent = `👤 ${currentUser.firstName} ${currentUser.lastName}`;
+            }
+
+            // Randevuları yükle
+            loadAppointments();
         });
     </script>
-
 </body>
 </html>

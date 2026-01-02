@@ -1,16 +1,16 @@
-wwwroot\css\anasayfa.css
-wwwroot\randevu.html
-wwwroot\index.html
-wwwroot\css\giris.css
-wwwroot\anasayfa.html
-wwwroot\fotograflar\logo.png
-wwwroot\fotograflar\kapakfoto.jpg
 wwwroot\admin-dashboard.html
 wwwroot\admin.html
-C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\css\anasayfa.css
-C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\randevu.html
-C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\index.html
-C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\css\giris.css
-C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\anasayfa.html
+wwwroot\anasayfa.html
+wwwroot\css\anasayfa.css
+wwwroot\css\giris.css
+wwwroot\fotograflar\kapakfoto.jpg
+wwwroot\fotograflar\logo.png
+wwwroot\randevu.html
+wwwroot\index.html
 C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\admin-dashboard.html
 C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\admin.html
+C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\anasayfa.html
+C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\css\anasayfa.css
+C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\css\giris.css
+C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\randevu.html
+C:\Users\Bünyamin Cüni\source\repos\MHRS\MHRS\wwwroot\index.html

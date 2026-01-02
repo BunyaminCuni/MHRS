@@ -127,10 +127,6 @@
     <script>
         const API_BASE_URL = 'https://localhost:7116/api';
         let registrationEmail = '';
-        let registrationFirstName = '';
-        let registrationLastName = '';
-        let registrationPhone = '';
-        let registrationPassword = '';
 
         // ============================================
         // MENU FONKSİYONLARI
@@ -156,10 +152,12 @@
         function showLoginForm() {
             x.style.left = "4px";
             x.style.opacity = 1;
+            x.style.display = "block";
             y.style.right = "-520px";
             y.style.opacity = 0;
             z.style.left = "-510px";
             z.style.opacity = 0;
+            z.style.display = "none";
             a.className = "btn white-btn";
             b.className = "btn";
         }
@@ -169,8 +167,10 @@
             x.style.opacity = 0;
             y.style.right = "5px";
             y.style.opacity = 1;
+            y.style.display = "block";
             z.style.left = "-510px";
             z.style.opacity = 0;
+            z.style.display = "none";
             a.className = "btn";
             b.className = "btn white-btn";
         }
@@ -178,8 +178,11 @@
         function showOtpForm() {
             x.style.left = "-510px";
             x.style.opacity = 0;
+            x.style.display = "none";
             y.style.right = "-520px";
             y.style.opacity = 0;
+            y.style.display = "none";
+            z.style.display = "block";
             z.style.left = "4px";
             z.style.opacity = 1;
         }
@@ -213,14 +216,14 @@
         async function handleRegister(event) {
             event.preventDefault();
 
-            registrationFirstName = document.getElementById('registerFirstName').value.trim();
-            registrationLastName = document.getElementById('registerLastName').value.trim();
-            registrationPhone = document.getElementById('registerPhone').value.trim();
-            registrationEmail = document.getElementById('registerEmail').value.trim();
-            registrationPassword = document.getElementById('registerPassword').value;
+            const firstName = document.getElementById('registerFirstName').value.trim();
+            const lastName = document.getElementById('registerLastName').value.trim();
+            const phone = document.getElementById('registerPhone').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
 
             // Telefon numarası kontrolü
-            if (registrationPhone.length !== 10) {
+            if (phone.length !== 10) {
                 alert('❌ Telefon numarası 10 haneli olmalıdır (örnek: 5551234567)');
                 return;
             }
@@ -229,18 +232,35 @@
             const users = JSON.parse(localStorage.getItem('users') || '[]');
 
             // Aynı telefon numarasına sahip kullanıcı var mı kontrol et
-            const existingUser = users.find(u => u.phone === registrationPhone);
+            const existingUser = users.find(u => u.phone === phone);
 
             if (existingUser) {
-                alert('❌ Bu telefon numarası ile kayıtlı bir kullanıcı bulunmaktadır!\n\nTelefon: ' + registrationPhone);
+                alert('❌ Bu telefon numarası ile kayıtlı bir kullanıcı bulunmaktadır!\n\nTelefon: ' + phone);
                 console.log('Mevcut kullanıcı:', existingUser);
                 return;
             }
 
-            console.log('✅ Kayıt doğrulaması başarılı');
+            // Yeni kullanıcı oluştur
+            const newUser = {
+                firstName: firstName,
+                lastName: lastName,
+                phone: phone,
+                email: email,
+                password: password,
+                createdAt: new Date().toISOString()
+            };
+
+            // Kullanıcıyı diziye ekle
+            users.push(newUser);
+
+            // LocalStorage'a kaydet
+            localStorage.setItem('users', JSON.stringify(users));
+
+            console.log('✅ Yeni kullanıcı kaydedildi:', newUser);
+            console.log('Toplam kullanıcı sayısı:', users.length);
 
             // OTP gönder
-            await sendOtp(registrationEmail);
+            await sendOtp(email);
 
             // Formu temizle
             document.getElementById('registerForm').reset();
@@ -291,21 +311,6 @@
                 const data = await response.json();
 
                 if (response.ok && data.verified) {
-                    // HESABI BURDA OLUŞTUR
-                    const users = JSON.parse(localStorage.getItem('users') || '[]');
-                    const newUser = {
-                        firstName: registrationFirstName,
-                        lastName: registrationLastName,
-                        phone: registrationPhone,
-                        email: registrationEmail,
-                        password: registrationPassword,
-                        createdAt: new Date().toISOString()
-                    };
-                    users.push(newUser);
-                    localStorage.setItem('users', JSON.stringify(users));
-
-                    console.log('✅ Yeni kullanıcı kaydedildi (OTP doğrulandı):', newUser);
-
                     messageEl.textContent = '✅ Email doğrulandı! Giriş yapabilirsiniz.';
                     messageEl.style.color = '#4caf50';
 
@@ -316,13 +321,6 @@
                 } else {
                     messageEl.textContent = '❌ ' + data.message;
                     messageEl.style.color = '#f44336';
-                    document.getElementById('otpCode').value = ''; // Kodu temizle
-                    // Tüm kayıt bilgilerini sıfırla (güvenlik için)
-                    registrationEmail = '';
-                    registrationFirstName = '';
-                    registrationLastName = '';
-                    registrationPhone = '';
-                    registrationPassword = '';
                 }
             } catch (error) {
                 messageEl.textContent = '❌ Hata: ' + error.message;
@@ -331,7 +329,7 @@
         }
 
         // ============================================
-        // GİRİŞ FONKSİYONU
+        // GİRİŞ FONKSİYONU - DÜZELTILMIŞ
         // ============================================
         function handleLogin(event) {
             event.preventDefault();
@@ -378,7 +376,12 @@
                 }
 
                 alert(`✅ Hoş geldiniz, ${user.firstName} ${user.lastName}!`);
-                window.location.href = 'anasayfa.html';
+
+                // setTimeout ile yönlendirme yap
+                setTimeout(() => {
+                    window.location.href = 'anasayfa.html';
+                }, 1000);
+
             } else {
                 console.log('❌ Kullanıcı bulunamadı');
 
@@ -397,13 +400,6 @@
         // SAYFA YÜKLENDİĞİNDE
         // ============================================
         window.addEventListener('DOMContentLoaded', function () {
-            // "Beni Hatırla" kontrolü
-            const rememberedUser = localStorage.getItem('currentUser');
-            if (rememberedUser) {
-                console.log('💾 Hatırlanan kullanıcı bulundu, yönlendiriliyor...');
-                window.location.href = 'anasayfa.html';
-            }
-
             // Debug: Kayıtlı kullanıcıları konsola yazdır
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             console.log('📋 Sistemde kayıtlı kullanıcılar:', users);
