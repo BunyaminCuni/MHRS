@@ -8,7 +8,7 @@
 }
 
 body {
-    background: url("../fotograflar/kapakfoto.jpg");
+    position: relative;
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -17,7 +17,36 @@ body {
     width: 100vw;
     backdrop-filter: blur(2px);
 }
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("../fotograflar/logo.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover; 
+    opacity: 0.08;
+    filter: blur(2px);
+    z-index: 0;
+    pointer-events: none;
+}
 
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1;
+    pointer-events: none;
+} 
+@media only screen and (max-width: 786px) {
+    body::before {
+        background-size: 60%;
+        opacity: 0.06;
+        filter: blur(4px);
+        background-position: top center;
+    }
+}
 .wrapper {
     display: flex;
     justify-content: center;
